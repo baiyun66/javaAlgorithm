@@ -1,0 +1,97 @@
+
+问题：
+    实现 strStr() 函数。给你两个字符串 haystack 和 needle ，请你在 haystack 字符串中找出 needle 字符串出现的第一个位置（下标从 0 开始）。如果不存在，则返回  -1 。
+
+说明：
+    当 needle 是空字符串时，我们应当返回什么值呢？这是一个在面试中很好的问题。
+    对于本题而言，当 needle 是空字符串时我们应当返回 0 。这与 C 语言的 strstr() 以及 Java 的 indexOf() 定义相符。
+
+    示例 1：
+    输入：haystack = "hello", needle = "ll"
+    输出：2
+
+    示例 2：
+    输入：haystack = "aaaaa", needle = "bba"
+    输出：-1
+
+    示例 3：
+    输入：haystack = "", needle = ""
+    输出：0
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/implement-strstr
+
+题解：
+    可以使用KMP算法，在暴力匹配的时候，由于每次都从下一个字符匹配导致中间重复的匹配，使用一个匹配数组回溯时，回溯到数组对应的位置即可
+
+    步骤1：求解next数组，即匹配数组，也就是回溯的位置数组
+    步骤2：遍历被匹配的字符串，相同则 i++,j++  不同，回溯 j 到对应的位置 j = next[j-1]
+
+    示例：
+            String haystack = "mississippi";
+            String needle = "issip";
+    步骤一：
+        issip 的 匹配数组（回溯位置数组）
+                    int[] nextArray = new int[dist.length()];
+                    if (dist.length() == 1) {
+                        nextArray[0] = 0;
+                    }
+                    for (int i = 1, j = 0; i < dist.length(); i++) {
+                        System.out.printf("%d ? %d\n",i,j);
+                        while (j > 0 && dist.charAt(i) != dist.charAt(j)) {
+                            j =nextArray[j - 1];
+                        }
+                        if (dist.charAt(i) == dist.charAt(j)) {
+                            j++;
+                        }
+                        nextArray[i] = j;
+                    }
+        演示：
+            issip
+            issip
+            相当于使用两个字符串作为遍历，相同 j++ i++,nextArray[i] = j;  不同并且j>0的时候，回溯到上一个直到相等或者j==0的时候。
+           上1:s? 下0:i
+           上2:s? 下0:i
+           上3:i? 下0:i
+           上4:p? 下1:s
+           0 0 0 1 0
+
+    步骤二：
+
+                int len = dist.length();
+                int i = 0;
+                int j =0;
+                while (j<len && i<str.length()){
+                    System.out.printf("匹配到 %d - %d\n",i,j);
+                    if(j>0 && str.charAt(i)!=dist.charAt(j)){
+                        j= nextArray[j-1];
+                    }else if(str.charAt(i)==dist.charAt(j)){
+                        j++;
+                        if(j==len){
+                           return i-len+1;
+                        }
+                        i++;
+                    }else {
+                        i++;
+                    }
+
+                }
+                return -1;
+       演示：
+
+           String haystack = "mississippi";
+           String needle = "issip";
+           两个字符串作为遍历，相同 j++ i++;  不同并且j>0的时候，回溯到上一个直到相等或者j==0的时候，当j==0不同则i++。
+           匹配到 1 - 0
+           匹配到 2 - 1
+           匹配到 3 - 2
+           匹配到 4 - 3
+           匹配到 5 - 4
+           匹配到 5 - 1
+           匹配到 6 - 2
+           匹配到 7 - 3
+           匹配到 8 - 4
+           位置为:4
+
+
+
